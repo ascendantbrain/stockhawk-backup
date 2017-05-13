@@ -26,7 +26,7 @@ import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
 public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAdapter.ViewHolder>
     implements ItemTouchHelperAdapter{
 
-  private static Context mContext;
+  private Context mContext;
   private static Typeface robotoLight;
   private boolean isPercent;
   public QuoteCursorAdapter(Context context, Cursor cursor){
@@ -39,30 +39,33 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     robotoLight = Typeface.createFromAsset(mContext.getAssets(), "fonts/Roboto-Light.ttf");
     View itemView = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.list_item_quote, parent, false);
-    ViewHolder vh = new ViewHolder(itemView);
-    return vh;
+    return new ViewHolder(itemView);
   }
 
   @Override
   public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor){
     viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex("symbol")));
-    viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex("bid_price")));
+    viewHolder.tradePrice.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.TRADEPRICE)));
     int sdk = Build.VERSION.SDK_INT;
     if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1){
       if (sdk < Build.VERSION_CODES.JELLY_BEAN){
         viewHolder.change.setBackgroundDrawable(
             mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
       }else {
-        viewHolder.change.setBackground(
-            mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          viewHolder.change.setBackground(
+              mContext.getResources().getDrawable(R.drawable.percent_change_pill_green));
+        }
       }
     } else{
       if (sdk < Build.VERSION_CODES.JELLY_BEAN) {
         viewHolder.change.setBackgroundDrawable(
             mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
       } else{
-        viewHolder.change.setBackground(
-            mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          viewHolder.change.setBackground(
+              mContext.getResources().getDrawable(R.drawable.percent_change_pill_red));
+        }
       }
     }
     if (Utils.showPercent){
@@ -84,16 +87,16 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     return super.getItemCount();
   }
 
-  public static class ViewHolder extends RecyclerView.ViewHolder
+  static class ViewHolder extends RecyclerView.ViewHolder
       implements ItemTouchHelperViewHolder, View.OnClickListener{
-    public final TextView symbol;
-    public final TextView bidPrice;
-    public final TextView change;
-    public ViewHolder(View itemView){
+    final TextView symbol;
+    final TextView tradePrice;
+    final TextView change;
+    ViewHolder(View itemView){
       super(itemView);
       symbol = (TextView) itemView.findViewById(R.id.stock_symbol);
       symbol.setTypeface(robotoLight);
-      bidPrice = (TextView) itemView.findViewById(R.id.bid_price);
+      tradePrice = (TextView) itemView.findViewById(R.id.trade_price);
       change = (TextView) itemView.findViewById(R.id.change);
     }
 
